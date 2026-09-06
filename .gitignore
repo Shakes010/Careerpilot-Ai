@@ -1,0 +1,66 @@
+# .gitignore for CareerPilot-AI
+# Branch: feature/sid-recruiter-payments
+
+# ===========================================================================
+# Python / Backend
+# ===========================================================================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment variables (never commit real secrets)
+backend/.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*~
+
+# ===========================================================================
+# Node / Frontend
+# ===========================================================================
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===========================================================================
+# OS
+# ===========================================================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===========================================================================
+# Alembic
+# ===========================================================================
+# Keep alembic.ini and versions/ tracked; ignore generated upgrade scripts
+# that are auto-generated during development.
+# Uncomment next line if you want to ignore migration files temporarily:
+# backend/alembic/versions/
