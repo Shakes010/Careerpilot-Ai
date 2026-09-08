@@ -39,7 +39,8 @@ class AuthService:
             password_hash=get_password_hash(req.password),
             full_name=req.full_name.strip(),
             phone=req.phone.strip() if req.phone else None,
-            role=UserRole.RECRUITER
+            role=UserRole.RECRUITER,
+            is_active=True
         )
         user = self.user_repo.create(user)
 
@@ -65,7 +66,8 @@ class AuthService:
             company_verification_status=company.verification_status.value
         )
 
-    def login_recruiter(self, req: RecruiterLoginRequest) -> TokenResponse:
+    def login_universal(self, req: RecruiterLoginRequest) -> TokenResponse:
+        """Universal authentication method supporting ADMIN, RECRUITER, and STUDENT roles."""
         user = self.user_repo.get_by_email(req.email)
         if not user or not verify_password(req.password, user.password_hash):
             raise HTTPException(
@@ -73,38 +75,62 @@ class AuthService:
                 detail="Invalid email or password."
             )
 
-        if user.role != UserRole.RECRUITER:
+        if user.is_active is False:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied. Only recruiter accounts can log in here."
+                detail="Account is deactivated or suspended. Please contact platform support."
             )
 
-        if not user.is_active:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Account is deactivated. Please contact support."
+        # ADMIN User Role
+        if user.role == UserRole.ADMIN:
+            token = create_access_token(data={"sub": user.id, "role": user.role.value})
+            return TokenResponse(
+                access_token=token,
+                user_id=user.id,
+                email=user.email,
+                full_name=user.full_name,
+                role=user.role.value,
+                company_id="",
+                company_name="Platform Administration",
+                company_verification_status="VERIFIED"
             )
 
-        recruiter = self.recruiter_repo.get_by_user_id(user.id)
-        if not recruiter:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Recruiter profile not found."
+        # RECRUITER User Role
+        if user.role == UserRole.RECRUITER:
+            recruiter = self.recruiter_repo.get_by_user_id(user.id)
+            company_id = recruiter.company_id if recruiter else ""
+            company_name = "Company"
+            company_status = "PENDING"
+            if recruiter and recruiter.company_id:
+                company = self.company_repo.get_by_id(recruiter.company_id)
+                if company:
+                    company_name = company.name
+                    company_status = company.verification_status.value
+
+            token = create_access_token(data={"sub": user.id, "role": user.role.value, "recruiter_id": recruiter.id if recruiter else None, "company_id": company_id})
+            return TokenResponse(
+                access_token=token,
+                user_id=user.id,
+                email=user.email,
+                full_name=user.full_name,
+                role=user.role.value,
+                company_id=company_id,
+                company_name=company_name,
+                company_verification_status=company_status
             )
 
-        company = self.company_repo.get_by_id(recruiter.company_id)
-        company_name = company.name if company else "Company"
-        company_status = company.verification_status.value if company else "PENDING"
-
-        token = create_access_token(data={"sub": user.id, "role": user.role.value, "recruiter_id": recruiter.id, "company_id": recruiter.company_id})
-
+        # STUDENT User Role
+        token = create_access_token(data={"sub": user.id, "role": user.role.value})
         return TokenResponse(
             access_token=token,
             user_id=user.id,
             email=user.email,
             full_name=user.full_name,
             role=user.role.value,
-            company_id=recruiter.company_id,
-            company_name=company_name,
-            company_verification_status=company_status
+            company_id="",
+            company_name="Student Portal",
+            company_verification_status="VERIFIED"
         )
+
+    def login_recruiter(self, req: RecruiterLoginRequest) -> TokenResponse:
+        return self.login_universal(req)

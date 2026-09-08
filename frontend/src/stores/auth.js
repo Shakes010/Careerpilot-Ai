@@ -14,7 +14,9 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isAuthenticated: (state) => !!state.token,
+    isAdmin: (state) => state.user?.role === 'ADMIN',
     isRecruiter: (state) => state.user?.role === 'RECRUITER',
+    isStudent: (state) => state.user?.role === 'STUDENT',
     isCompanyVerified: (state) => state.companyVerificationStatus === 'VERIFIED'
   },
 
@@ -40,7 +42,7 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true
       this.error = null
       try {
-        const response = await authApi.loginRecruiter(loginData)
+        const response = await authApi.login(loginData)
         if (response.success && response.data) {
           this.setAuthData(response.data)
         }
@@ -58,16 +60,9 @@ export const useAuthStore = defineStore('auth', {
       try {
         const response = await authApi.getCurrentUser()
         if (response.success && response.data) {
-          const { user, company } = response.data
+          const { user } = response.data
           this.user = user
-          this.companyId = company.id
-          this.companyName = company.name
-          this.companyVerificationStatus = company.verification_status
-          
           localStorage.setItem('cp_user', JSON.stringify(user))
-          localStorage.setItem('cp_company_id', company.id)
-          localStorage.setItem('cp_company_name', company.name)
-          localStorage.setItem('cp_company_status', company.verification_status)
         }
       } catch (err) {
         this.logout()
@@ -82,15 +77,15 @@ export const useAuthStore = defineStore('auth', {
         full_name: data.full_name,
         role: data.role
       }
-      this.companyId = data.company_id
-      this.companyName = data.company_name
-      this.companyVerificationStatus = data.company_verification_status
+      this.companyId = data.company_id || ''
+      this.companyName = data.company_name || ''
+      this.companyVerificationStatus = data.company_verification_status || 'VERIFIED'
 
       localStorage.setItem('cp_token', data.access_token)
       localStorage.setItem('cp_user', JSON.stringify(this.user))
-      localStorage.setItem('cp_company_id', data.company_id)
-      localStorage.setItem('cp_company_name', data.company_name)
-      localStorage.setItem('cp_company_status', data.company_verification_status)
+      localStorage.setItem('cp_company_id', this.companyId)
+      localStorage.setItem('cp_company_name', this.companyName)
+      localStorage.setItem('cp_company_status', this.companyVerificationStatus)
     },
 
     logout() {

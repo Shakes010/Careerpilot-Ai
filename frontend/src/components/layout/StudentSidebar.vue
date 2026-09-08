@@ -1,21 +1,16 @@
 <template>
-  <aside class="app-sidebar">
+  <aside class="student-sidebar">
     <div class="sidebar-nav">
-      <div class="nav-section-title">RECRUITER PORTAL</div>
+      <div class="nav-section-title">STUDENT PORTAL</div>
 
-      <router-link to="/recruiter/dashboard" class="nav-item" active-class="active">
-        <span class="nav-icon">📊</span>
-        <span class="nav-label">Dashboard</span>
+      <router-link to="/student/projects" class="nav-item" active-class="active">
+        <span class="nav-icon">🤝</span>
+        <span class="nav-label">Projects</span>
       </router-link>
 
-      <router-link to="/recruiter/company" class="nav-item" active-class="active">
-        <span class="nav-icon">🏢</span>
-        <span class="nav-label">Company Profile</span>
-      </router-link>
-
-      <router-link to="/recruiter/jobs" class="nav-item" active-class="active">
-        <span class="nav-icon">💼</span>
-        <span class="nav-label">Manage Jobs</span>
+      <router-link to="/student/career-sandbox" class="nav-item" active-class="active">
+        <span class="nav-icon">🧪</span>
+        <span class="nav-label">Career Sandbox</span>
       </router-link>
     </div>
   </aside>
@@ -25,11 +20,11 @@
 </script>
 
 <style scoped>
-.app-sidebar {
+.student-sidebar {
   width: 240px;
   background-color: var(--surface);
   border-right: 1px solid var(--border);
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - 64px);
   padding: 1.25rem 0.75rem;
   display: flex;
   flex-direction: column;
@@ -59,15 +54,15 @@
 }
 
 .nav-item:hover {
-  background-color: var(--primary-light);
-  color: var(--primary);
+  background-color: #d1fae5;
+  color: #065f46;
 }
 
 .nav-item.active {
-  background-color: var(--primary-light);
-  color: var(--primary);
+  background-color: #d1fae5;
+  color: #065f46;
   font-weight: 600;
-  border-left: 3px solid var(--primary);
+  border-left: 3px solid #10b981;
 }
 
 .nav-icon { font-size: 1.125rem; }

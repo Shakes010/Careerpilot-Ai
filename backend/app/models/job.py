@@ -23,6 +23,12 @@ class JobStatus(str, enum.Enum):
     CLOSED = "CLOSED"
     EXPIRED = "EXPIRED"
 
+class ModerationStatus(str, enum.Enum):
+    APPROVED = "APPROVED"
+    PENDING = "PENDING"
+    FLAGGED = "FLAGGED"
+    TAKEN_DOWN = "TAKEN_DOWN"
+
 class Job(Base):
     __tablename__ = "jobs"
 
@@ -48,6 +54,10 @@ class Job(Base):
     application_deadline = Column(Date, nullable=False)
     status = Column(Enum(JobStatus), nullable=False, default=JobStatus.DRAFT, index=True)
     
+    # Moderation fields
+    moderation_status = Column(Enum(ModerationStatus), nullable=False, default=ModerationStatus.APPROVED)
+    moderation_notes = Column(Text, nullable=True)
+
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
 

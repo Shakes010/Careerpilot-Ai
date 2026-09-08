@@ -10,6 +10,7 @@ from app.repositories.company_repository import CompanyRepository
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
+@router.post("/register", response_model=ApiResponse[TokenResponse], status_code=status.HTTP_201_CREATED)
 @router.post("/recruiter/register", response_model=ApiResponse[TokenResponse], status_code=status.HTTP_201_CREATED)
 def register_recruiter(req: RecruiterRegisterRequest, db: Session = Depends(get_db)):
     """Register a new recruiter and associated company (verification status set to PENDING)."""
@@ -21,11 +22,12 @@ def register_recruiter(req: RecruiterRegisterRequest, db: Session = Depends(get_
         message="Recruiter registered successfully. Your company verification is pending."
     )
 
+@router.post("/login", response_model=ApiResponse[TokenResponse])
 @router.post("/recruiter/login", response_model=ApiResponse[TokenResponse])
-def login_recruiter(req: RecruiterLoginRequest, db: Session = Depends(get_db)):
-    """Authenticate recruiter with email and password."""
+def login_user(req: RecruiterLoginRequest, db: Session = Depends(get_db)):
+    """Universal authentication endpoint supporting ADMIN, RECRUITER, and STUDENT logins."""
     service = AuthService(db)
-    token_resp = service.login_recruiter(req)
+    token_resp = service.login_universal(req)
     return ApiResponse(
         success=True,
         data=token_resp,
@@ -35,12 +37,9 @@ def login_recruiter(req: RecruiterLoginRequest, db: Session = Depends(get_db)):
 @router.get("/me", response_model=ApiResponse[dict])
 def get_current_profile(
     user: User = Depends(get_current_user),
-    recruiter: Recruiter = Depends(get_current_recruiter),
     db: Session = Depends(get_db)
 ):
-    """Retrieve currently authenticated recruiter's profile and company metadata."""
-    company_repo = CompanyRepository(db)
-    company = company_repo.get_by_id(recruiter.company_id)
+    """Retrieve currently authenticated user's profile metadata."""
     return ApiResponse(
         success=True,
         data={
@@ -50,15 +49,6 @@ def get_current_profile(
                 "full_name": user.full_name,
                 "phone": user.phone,
                 "role": user.role.value
-            },
-            "recruiter": {
-                "id": recruiter.id,
-                "designation": recruiter.designation
-            },
-            "company": {
-                "id": company.id if company else None,
-                "name": company.name if company else "",
-                "verification_status": company.verification_status.value if company else "PENDING"
             }
         },
         message="Profile retrieved."
