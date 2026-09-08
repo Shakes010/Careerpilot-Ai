@@ -6,7 +6,7 @@ from app.models.recruiter import Recruiter
 from app.repositories.user_repository import UserRepository
 from app.repositories.company_repository import CompanyRepository
 from app.repositories.recruiter_repository import RecruiterRepository
-from app.schemas.auth import RecruiterRegisterRequest, RecruiterLoginRequest, TokenResponse
+from app.schemas.auth import RecruiterRegisterRequest, RecruiterLoginRequest, TokenResponse, ChangePasswordRequest, ChangeEmailRequest, UserResponse
 from app.core.security import get_password_hash, verify_password, create_access_token
 
 class AuthService:
@@ -134,3 +134,49 @@ class AuthService:
 
     def login_recruiter(self, req: RecruiterLoginRequest) -> TokenResponse:
         return self.login_universal(req)
+
+    def change_password(self, user: User, req: ChangePasswordRequest) -> bool:
+        """Validate current password and update to new password."""
+        if not verify_password(req.current_password, user.password_hash):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Current password is incorrect."
+            )
+
+        user.password_hash = get_password_hash(req.new_password)
+        self.db.commit()
+        return True
+
+    def change_email(self, user: User, req: ChangeEmailRequest) -> UserResponse:
+        """Validate current password, verify email uniqueness, and update email address."""
+        if not verify_password(req.password, user.password_hash):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Incorrect password. Password verification required to change email."
+            )
+
+        new_email = req.new_email.lower().strip()
+        if new_email == user.email.lower():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="New email is identical to current email."
+            )
+
+        existing = self.user_repo.get_by_email(new_email)
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This email address is already in use by another account."
+            )
+
+        user.email = new_email
+        self.db.commit()
+        self.db.refresh(user)
+        return UserResponse(
+            id=user.id,
+            email=user.email,
+            full_name=user.full_name,
+            phone=user.phone,
+            role=user.role.value,
+            is_active=user.is_active
+        )

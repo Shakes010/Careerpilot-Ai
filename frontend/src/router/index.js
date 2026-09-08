@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/auth'
 
 // Universal Auth Views
 import UniversalLogin from '@/views/auth/UniversalLogin.vue'
+import AccountSettings from '@/views/auth/AccountSettings.vue'
 import RecruiterRegister from '@/views/recruiter/RecruiterRegister.vue'
 
 // Recruiter Views
@@ -38,6 +39,12 @@ const routes = [
   { path: '/recruiter/login', redirect: '/login' },
   { path: '/admin/login', redirect: '/login' },
   { path: '/recruiter/register', name: 'RecruiterRegister', component: RecruiterRegister, meta: { guestOnly: true } },
+
+  // Universal Account Settings
+  { path: '/settings', name: 'AccountSettings', component: AccountSettings, meta: { requiresAuth: true } },
+  { path: '/student/settings', redirect: '/settings' },
+  { path: '/recruiter/settings', redirect: '/settings' },
+  { path: '/admin/settings', redirect: '/settings' },
 
   // Recruiter Routes
   { path: '/recruiter/dashboard', name: 'RecruiterDashboard', component: RecruiterDashboard, meta: { requiresAuth: true } },

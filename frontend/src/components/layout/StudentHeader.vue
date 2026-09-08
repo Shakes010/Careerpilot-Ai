@@ -45,6 +45,9 @@
           <router-link to="/student/career-sandbox" class="dropdown-item">
             🧪 Career Sandbox
           </router-link>
+          <router-link to="/settings" class="dropdown-item">
+            ⚙️ Account Settings
+          </router-link>
           <hr />
           <button class="dropdown-item logout-btn" @click="handleLogout">
             🚪 Logout

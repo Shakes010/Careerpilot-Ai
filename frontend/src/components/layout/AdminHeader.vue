@@ -13,6 +13,9 @@
         <span class="admin-name">{{ authStore.user?.full_name || 'Administrator' }}</span>
         <span class="admin-role-chip">Platform Admin</span>
       </div>
+      <router-link to="/settings" class="btn btn-secondary btn-sm">
+        ⚙️ Settings
+      </router-link>
       <button class="btn btn-secondary btn-sm" @click="handleLogout">
         🚪 Logout
       </button>
@@ -29,7 +32,7 @@ const authStore = useAuthStore()
 
 const handleLogout = () => {
   authStore.logout()
-  router.push('/admin/login')
+  router.push('/login')
 }
 </script>
 
@@ -70,7 +73,7 @@ const handleLogout = () => {
   text-transform: uppercase;
 }
 
-.header-right { display: flex; align-items: center; gap: 1rem; }
+.header-right { display: flex; align-items: center; gap: 0.75rem; }
 
 .admin-user-info { display: flex; flex-direction: column; text-align: right; }
 .admin-name { font-size: 0.875rem; font-weight: 600; color: #f8fafc; }

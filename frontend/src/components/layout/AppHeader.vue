@@ -47,6 +47,9 @@
           <router-link to="/recruiter/jobs" class="dropdown-item">
             💼 Manage Jobs
           </router-link>
+          <router-link to="/settings" class="dropdown-item">
+            ⚙️ Account Settings
+          </router-link>
           <hr />
           <button class="dropdown-item logout-btn" @click="handleLogout">
             🚪 Logout
@@ -80,7 +83,7 @@ const companyStatusClass = computed(() => {
 
 const handleLogout = () => {
   authStore.logout()
-  router.push('/recruiter/login')
+  router.push('/login')
 }
 </script>
 

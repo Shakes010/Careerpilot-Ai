@@ -10,6 +10,12 @@ export default {
   loginRecruiter(data) {
     return api.post('/auth/login', data)
   },
+  changePassword(data) {
+    return api.put('/auth/change-password', data)
+  },
+  changeEmail(data) {
+    return api.put('/auth/change-email', data)
+  },
   getCurrentUser() {
     return api.get('/auth/me')
   },

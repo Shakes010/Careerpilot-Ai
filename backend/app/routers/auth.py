@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.schemas.auth import RecruiterRegisterRequest, RecruiterLoginRequest, TokenResponse, ApiResponse, UserResponse
+from app.schemas.auth import (
+    RecruiterRegisterRequest, RecruiterLoginRequest, TokenResponse, ApiResponse, UserResponse,
+    ChangePasswordRequest, ChangeEmailRequest
+)
 from app.services.auth_service import AuthService
-from app.dependencies.auth import get_current_user, get_current_recruiter
+from app.dependencies.auth import get_current_user
 from app.models.user import User
-from app.models.recruiter import Recruiter
-from app.repositories.company_repository import CompanyRepository
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -32,6 +33,36 @@ def login_user(req: RecruiterLoginRequest, db: Session = Depends(get_db)):
         success=True,
         data=token_resp,
         message="Login successful."
+    )
+
+@router.put("/change-password", response_model=ApiResponse[dict])
+def change_password(
+    req: ChangePasswordRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Change currently authenticated user's password."""
+    service = AuthService(db)
+    service.change_password(user, req)
+    return ApiResponse(
+        success=True,
+        data={},
+        message="Password updated successfully."
+    )
+
+@router.put("/change-email", response_model=ApiResponse[UserResponse])
+def change_email(
+    req: ChangeEmailRequest,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Change currently authenticated user's email address."""
+    service = AuthService(db)
+    updated_user = service.change_email(user, req)
+    return ApiResponse(
+        success=True,
+        data=updated_user,
+        message=f"Email address updated to '{updated_user.email}'."
     )
 
 @router.get("/me", response_model=ApiResponse[dict])

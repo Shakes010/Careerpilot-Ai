@@ -55,6 +55,38 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    async changePassword(passwordData) {
+      this.loading = true
+      this.error = null
+      try {
+        const response = await authApi.changePassword(passwordData)
+        return response
+      } catch (err) {
+        this.error = err.response?.data?.detail || 'Failed to change password.'
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async changeEmail(emailData) {
+      this.loading = true
+      this.error = null
+      try {
+        const response = await authApi.changeEmail(emailData)
+        if (response.success && response.data) {
+          this.user.email = response.data.email
+          localStorage.setItem('cp_user', JSON.stringify(this.user))
+        }
+        return response
+      } catch (err) {
+        this.error = err.response?.data?.detail || 'Failed to change email address.'
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
     async fetchCurrentUser() {
       if (!this.token) return
       try {

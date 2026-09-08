@@ -22,6 +22,14 @@ class RecruiterLoginRequest(BaseModel):
     email: EmailStr
     password: str
 
+class ChangePasswordRequest(BaseModel):
+    current_password: str = Field(..., min_length=1, description="Current password for identity verification")
+    new_password: str = Field(..., min_length=6, max_length=100, description="New password (minimum 6 characters)")
+
+class ChangeEmailRequest(BaseModel):
+    new_email: EmailStr = Field(..., description="New email address")
+    password: str = Field(..., min_length=1, description="Current password for identity verification")
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
