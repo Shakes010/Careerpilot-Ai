@@ -4,17 +4,17 @@
       <div class="nav-section-title">RECRUITER PORTAL</div>
 
       <router-link to="/recruiter/dashboard" class="nav-item" active-class="active">
-        <span class="nav-icon">📊</span>
+        <AppSvgIcon name="dashboard" size="18" class="nav-icon" />
         <span class="nav-label">Dashboard</span>
       </router-link>
 
       <router-link to="/recruiter/company" class="nav-item" active-class="active">
-        <span class="nav-icon">🏢</span>
+        <AppSvgIcon name="building" size="18" class="nav-icon" />
         <span class="nav-label">Company Profile</span>
       </router-link>
 
       <router-link to="/recruiter/jobs" class="nav-item" active-class="active">
-        <span class="nav-icon">💼</span>
+        <AppSvgIcon name="briefcase" size="18" class="nav-icon" />
         <span class="nav-label">Manage Jobs</span>
       </router-link>
     </div>
@@ -22,6 +22,7 @@
 </template>
 
 <script setup>
+import AppSvgIcon from '@/components/common/AppSvgIcon.vue'
 </script>
 
 <style scoped>
@@ -29,7 +30,7 @@
   width: 240px;
   background-color: var(--surface);
   border-right: 1px solid var(--border);
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - 64px);
   padding: 1.25rem 0.75rem;
   display: flex;
   flex-direction: column;
@@ -70,5 +71,6 @@
   border-left: 3px solid var(--primary);
 }
 
-.nav-icon { font-size: 1.125rem; }
+.nav-icon { color: var(--text-muted); }
+.nav-item.active .nav-icon { color: var(--primary); }
 </style>

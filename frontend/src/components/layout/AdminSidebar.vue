@@ -4,28 +4,28 @@
       <div class="nav-section-title">ADMINISTRATION</div>
 
       <router-link to="/admin/dashboard" class="nav-item" active-class="active">
-        <span class="nav-icon">📊</span>
+        <AppSvgIcon name="dashboard" size="18" class="nav-icon" />
         <span class="nav-label">Admin Dashboard</span>
       </router-link>
 
       <router-link to="/admin/users" class="nav-item" active-class="active">
-        <span class="nav-icon">👤</span>
+        <AppSvgIcon name="users" size="18" class="nav-icon" />
         <span class="nav-label">User Management</span>
       </router-link>
 
       <router-link to="/admin/verifications" class="nav-item" active-class="active">
-        <span class="nav-icon">🏢</span>
+        <AppSvgIcon name="building" size="18" class="nav-icon" />
         <span class="nav-label">Recruiter Verification</span>
         <span class="priority-dot" title="High Priority">⚠️</span>
       </router-link>
 
       <router-link to="/admin/job-moderation" class="nav-item" active-class="active">
-        <span class="nav-icon">🔍</span>
+        <AppSvgIcon name="search" size="18" class="nav-icon" />
         <span class="nav-label">Job Moderation</span>
       </router-link>
 
       <router-link to="/admin/skills" class="nav-item" active-class="active">
-        <span class="nav-icon">📚</span>
+        <AppSvgIcon name="book" size="18" class="nav-icon" />
         <span class="nav-label">Skill Library</span>
       </router-link>
 
@@ -33,12 +33,12 @@
       <div class="nav-section-title">ANALYTICS & GOVERNANCE</div>
 
       <router-link to="/admin/analytics" class="nav-item" active-class="active">
-        <span class="nav-icon">📈</span>
+        <AppSvgIcon name="chart" size="18" class="nav-icon" />
         <span class="nav-label">Platform Analytics</span>
       </router-link>
 
       <router-link to="/admin/flagged-queue" class="nav-item" active-class="active">
-        <span class="nav-icon">🚩</span>
+        <AppSvgIcon name="flag" size="18" class="nav-icon" />
         <span class="nav-label">Flagged Review Queue</span>
       </router-link>
     </div>
@@ -46,6 +46,7 @@
 </template>
 
 <script setup>
+import AppSvgIcon from '@/components/common/AppSvgIcon.vue'
 </script>
 
 <style scoped>
@@ -94,7 +95,8 @@
   border-left: 3px solid var(--primary);
 }
 
-.nav-icon { font-size: 1.125rem; }
+.nav-icon { color: var(--text-muted); }
+.nav-item.active .nav-icon { color: var(--primary); }
 
 .priority-dot { margin-left: auto; font-size: 0.75rem; }
 

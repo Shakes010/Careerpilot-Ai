@@ -2,7 +2,9 @@
   <div class="auth-page">
     <div class="auth-card">
       <div class="auth-brand">
-        <span class="brand-logo">🚀</span>
+        <div class="brand-icon-wrap">
+          <AppSvgIcon name="rocket" size="32" class="brand-icon" />
+        </div>
         <h2>CareerPilot <span class="text-primary">AI</span></h2>
         <p class="auth-subtitle">Platform Unified Login</p>
       </div>
@@ -60,6 +62,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import AppInput from '@/components/common/AppInput.vue'
 import AppButton from '@/components/common/AppButton.vue'
+import AppSvgIcon from '@/components/common/AppSvgIcon.vue'
 import { useToast } from '@/components/common/AppToast.vue'
 
 const router = useRouter()
@@ -124,8 +127,16 @@ const handleForgotPass = () => {
   margin-bottom: 2rem;
 }
 
-.brand-logo {
-  font-size: 2.5rem;
+.brand-icon-wrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.75rem auto;
 }
 
 .auth-brand h2 {

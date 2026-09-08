@@ -3,7 +3,7 @@
     <div class="analytics-page">
       <div class="page-header">
         <div>
-          <h1 class="page-title">Platform Analytics & Telemetry 📈</h1>
+          <h1 class="page-title">Platform Analytics & Telemetry</h1>
           <p class="page-subtitle">Real-time system telemetry, active engagement rates, and platform placement metrics.</p>
         </div>
       </div>
@@ -14,7 +14,9 @@
         <!-- Primary KPI Grid -->
         <div class="kpi-grid">
           <AppCard class="kpi-card">
-            <div class="kpi-icon student-icon">🎓</div>
+            <div class="kpi-icon student-icon">
+              <AppSvgIcon name="cap" size="24" />
+            </div>
             <div class="kpi-data">
               <span class="kpi-label">Active Students</span>
               <h2 class="kpi-val">{{ analytics.active_students }}</h2>
@@ -22,7 +24,9 @@
           </AppCard>
 
           <AppCard class="kpi-card">
-            <div class="kpi-icon recruiter-icon">💼</div>
+            <div class="kpi-icon recruiter-icon">
+              <AppSvgIcon name="briefcase" size="24" />
+            </div>
             <div class="kpi-data">
               <span class="kpi-label">Active Recruiters</span>
               <h2 class="kpi-val">{{ analytics.active_recruiters }}</h2>
@@ -30,7 +34,9 @@
           </AppCard>
 
           <AppCard class="kpi-card">
-            <div class="kpi-icon company-icon">🏢</div>
+            <div class="kpi-icon company-icon">
+              <AppSvgIcon name="building" size="24" />
+            </div>
             <div class="kpi-data">
               <span class="kpi-label">Verified Companies</span>
               <h2 class="kpi-val">{{ analytics.verified_companies }}</h2>
@@ -38,7 +44,9 @@
           </AppCard>
 
           <AppCard class="kpi-card">
-            <div class="kpi-icon jobs-icon">📋</div>
+            <div class="kpi-icon jobs-icon">
+              <AppSvgIcon name="chart" size="24" />
+            </div>
             <div class="kpi-data">
               <span class="kpi-label">Total Jobs Requisitions</span>
               <h2 class="kpi-val">{{ analytics.total_jobs }}</h2>
@@ -48,7 +56,7 @@
 
         <!-- Telemetry Details Grid -->
         <div class="telemetry-sections-grid">
-          <AppCard title="🤝 Student Collaboration Telemetry" subtitle="Student project creation and Career Sandbox activity.">
+          <AppCard title="Student Collaboration Telemetry" subtitle="Student project creation and Career Sandbox activity.">
             <div class="stat-rows">
               <div class="stat-item">
                 <span class="stat-label">Active Collaboration Projects</span>
@@ -65,7 +73,7 @@
             </div>
           </AppCard>
 
-          <AppCard title="🛡️ Trust & Verification Telemetry" subtitle="Company verification velocity and moderation safety.">
+          <AppCard title="Trust & Verification Telemetry" subtitle="Company verification velocity and moderation safety.">
             <div class="stat-rows">
               <div class="stat-item">
                 <span class="stat-label">Pending Company Verifications</span>
@@ -92,6 +100,7 @@ import { computed, onMounted } from 'vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import AppCard from '@/components/common/AppCard.vue'
 import AppLoader from '@/components/common/AppLoader.vue'
+import AppSvgIcon from '@/components/common/AppSvgIcon.vue'
 import { useAdminStore } from '@/stores/admin'
 
 const adminStore = useAdminStore()
@@ -111,11 +120,11 @@ onMounted(() => {
 
 .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; }
 .kpi-card { display: flex; align-items: center; gap: 1rem; }
-.kpi-icon { width: 48px; height: 48px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: justify-center; font-size: 1.375rem; display: flex; align-items: center; justify-content: center; }
-.student-icon { background: #dbeafe; }
-.recruiter-icon { background: #e0e7ff; }
-.company-icon { background: #dcfce7; }
-.jobs-icon { background: #fef3c7; }
+.kpi-icon { width: 48px; height: 48px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; }
+.student-icon { background: #dbeafe; color: #1e40af; }
+.recruiter-icon { background: #e0e7ff; color: #3730a3; }
+.company-icon { background: #dcfce7; color: #166534; }
+.jobs-icon { background: #fef3c7; color: #92400e; }
 
 .kpi-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
 .kpi-val { font-size: 1.75rem; font-weight: 700; color: var(--text-heading); margin-top: 0.125rem; }

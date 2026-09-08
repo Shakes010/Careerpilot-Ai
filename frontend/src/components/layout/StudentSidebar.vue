@@ -4,12 +4,12 @@
       <div class="nav-section-title">STUDENT PORTAL</div>
 
       <router-link to="/student/projects" class="nav-item" active-class="active">
-        <span class="nav-icon">🤝</span>
+        <AppSvgIcon name="project" size="18" class="nav-icon" />
         <span class="nav-label">Projects</span>
       </router-link>
 
       <router-link to="/student/career-sandbox" class="nav-item" active-class="active">
-        <span class="nav-icon">🧪</span>
+        <AppSvgIcon name="flask" size="18" class="nav-icon" />
         <span class="nav-label">Career Sandbox</span>
       </router-link>
     </div>
@@ -17,6 +17,7 @@
 </template>
 
 <script setup>
+import AppSvgIcon from '@/components/common/AppSvgIcon.vue'
 </script>
 
 <style scoped>
@@ -65,5 +66,6 @@
   border-left: 3px solid #10b981;
 }
 
-.nav-icon { font-size: 1.125rem; }
+.nav-icon { color: var(--text-muted); }
+.nav-item.active .nav-icon { color: #059669; }
 </style>
