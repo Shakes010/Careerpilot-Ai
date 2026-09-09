@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.core.config import settings
 from app.core.database import engine, Base
-from app.routers import auth, company, recruiter, jobs, admin, projects, sandbox
+from app.routers import auth, company, recruiter, jobs, admin, projects, sandbox, notifications
 
 # Create database tables automatically on startup if using SQLite/local dev
 Base.metadata.create_all(bind=engine)
@@ -19,7 +19,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="CareerPilot AI - Recruiter, Admin, Project Collaboration & Career Sandbox REST API",
+    description="CareerPilot AI - Recruiter, Admin, Project Collaboration, Sandbox & Notification REST API",
     docs_url="/docs",
     redoc_url="/redoc"
 )
@@ -41,6 +41,7 @@ app.include_router(jobs.router, prefix=settings.API_V1_STR)
 app.include_router(admin.router, prefix=settings.API_V1_STR)
 app.include_router(projects.router, prefix=settings.API_V1_STR)
 app.include_router(sandbox.router, prefix=settings.API_V1_STR)
+app.include_router(notifications.router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def root():

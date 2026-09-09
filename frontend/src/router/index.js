@@ -21,6 +21,7 @@ import RecruiterVerification from '@/views/admin/RecruiterVerification.vue'
 import JobModeration from '@/views/admin/JobModeration.vue'
 import SkillLibrary from '@/views/admin/SkillLibrary.vue'
 import PlatformAnalytics from '@/views/admin/PlatformAnalytics.vue'
+import NotificationsView from '@/views/admin/NotificationsView.vue'
 import FlaggedQueue from '@/views/admin/FlaggedQueue.vue'
 
 // Student Phase 2A Views
@@ -61,6 +62,7 @@ const routes = [
   { path: '/admin/job-moderation', name: 'JobModeration', component: JobModeration, meta: { requiresAdmin: true } },
   { path: '/admin/skills', name: 'SkillLibrary', component: SkillLibrary, meta: { requiresAdmin: true } },
   { path: '/admin/analytics', name: 'PlatformAnalytics', component: PlatformAnalytics, meta: { requiresAdmin: true } },
+  { path: '/admin/notifications', name: 'NotificationsView', component: NotificationsView, meta: { requiresAdmin: true } },
   { path: '/admin/flagged-queue', name: 'FlaggedQueue', component: FlaggedQueue, meta: { requiresAdmin: true } },
 
   // Student Phase 2A Routes

@@ -15,6 +15,7 @@ from app.models.project import (
     Project, ProjectMember, ProjectTask, ProjectStatus, ProjectVisibility, MemberRole, MemberStatus, TaskPriority, TaskStatus
 )
 from app.models.sandbox import SandboxChallenge, SandboxDifficulty, SandboxStatus
+from app.models.notification import Notification
 
 def seed_data():
     print("=== Initializing CareerPilot AI Database Seed ===")
@@ -208,6 +209,32 @@ def seed_data():
             )
             db.add(ch)
             print(f"[OK] Seeded Sandbox Challenge: {ch.title} [{ch.difficulty.value}]")
+
+        # 7. Seed Sample System Notifications
+        demo_notifications = [
+            {
+                "user_id": admin_user.id,
+                "title": "System Audit Complete",
+                "message": "Platform verification queue status: 1 company pending review.",
+                "is_read": False
+            },
+            {
+                "user_id": student_user.id,
+                "title": "Welcome to CareerPilot AI!",
+                "message": "Start by exploring collaboration projects or taking a Career Sandbox challenge.",
+                "is_read": False
+            },
+            {
+                "user_id": recruiter_user.id,
+                "title": "Company Profile Verified",
+                "message": "CareerPilot Technologies has been officially verified by platform administrators.",
+                "is_read": True
+            }
+        ]
+
+        for n_data in demo_notifications:
+            db.add(Notification(**n_data))
+        print("[OK] Seeded Initial System Notifications")
 
         db.commit()
         print("\nDatabase Seed Completed Successfully!")

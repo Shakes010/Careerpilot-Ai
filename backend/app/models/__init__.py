@@ -13,6 +13,7 @@ from app.models.sandbox import (
     SandboxDifficulty, SandboxStatus, AttemptStatus
 )
 from app.models.admin import UserAudit, FlaggedActivity, PlatformTelemetry, FlagTargetType, FlagStatus
+from app.models.notification import Notification
 
 __all__ = [
     "User",
@@ -49,5 +50,6 @@ __all__ = [
     "FlaggedActivity",
     "PlatformTelemetry",
     "FlagTargetType",
-    "FlagStatus"
+    "FlagStatus",
+    "Notification"
 ]

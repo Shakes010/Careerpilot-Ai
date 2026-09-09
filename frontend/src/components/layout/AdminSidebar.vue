@@ -37,6 +37,11 @@
         <span class="nav-label">Platform Analytics</span>
       </router-link>
 
+      <router-link to="/admin/notifications" class="nav-item" active-class="active">
+        <AppSvgIcon name="bell" size="18" class="nav-icon" />
+        <span class="nav-label">Notifications</span>
+      </router-link>
+
       <router-link to="/admin/flagged-queue" class="nav-item" active-class="active">
         <AppSvgIcon name="flag" size="18" class="nav-icon" />
         <span class="nav-label">Flagged Review Queue</span>
