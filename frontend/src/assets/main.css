@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-blue: #2563EB;
+  --dark-navy: #0F172A;
+  --bg-color: #F5F8FA;
+  --card-bg: #FFFFFF;
+  --border-color: #E2E8F0;
+  --success-green: #10B981;
+  --warning-amber: #F59E0B;
+  --purple-accent: #8B5CF6;
+  --pink-accent: #EC4899;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--dark-navy);
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Custom scrollbar for clean UI */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+.card-shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+}
+
+.card-hover-shadow {
+  transition: all 0.2s ease-in-out;
+}
+.card-hover-shadow:hover {
+  box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+}
