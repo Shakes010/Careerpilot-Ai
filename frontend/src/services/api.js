@@ -1,36 +1,34 @@
-import axios from 'axios'
+import { useAuthStore } from '../store'
 
-const api = axios.create({
-  baseURL: '/api',
-  headers: {
-    'Content-Type': 'application/json'
+const BASE_URL = 'http://127.0.0.1:8000'
+
+export async function apiFetch(endpoint, options = {}) {
+  const authStore = useAuthStore()
+  
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {})
   }
-})
 
-// Request Interceptor: Attach JWT Bearer Token
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('cp_token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+  if (authStore.token) {
+    headers['Authorization'] = `Bearer ${authStore.token}`
   }
-  return config
-}, (error) => {
-  return Promise.reject(error)
-})
 
-// Response Interceptor: Catch 401 Unauthorized
-api.interceptors.response.use((response) => {
-  return response.data
-}, (error) => {
-  if (error.response && error.response.status === 401) {
-    localStorage.removeItem('cp_token')
-    localStorage.removeItem('cp_user')
-    // Redirect to login if unauthenticated on protected route
-    if (!window.location.pathname.includes('/recruiter/login') && !window.location.pathname.includes('/recruiter/register')) {
-      window.location.href = '/recruiter/login'
-    }
+  const response = await fetch(`${BASE_URL}${endpoint}`, {
+    ...options,
+    headers
+  })
+
+  if (response.status === 401) {
+    authStore.logout()
+    window.location.href = '/login'
+    throw new Error('Unauthorized')
   }
-  return Promise.reject(error)
-})
 
-export default api
+  const data = await response.json()
+  if (!response.ok) {
+    throw new Error(data.detail || 'API Request Failed')
+  }
+
+  return data
+}

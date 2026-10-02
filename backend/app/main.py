@@ -1,60 +1,54 @@
-import sys
-import os
-
-# Ensure backend folder is in Python path for uvicorn imports
-backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if backend_dir not in sys.path:
-    sys.path.insert(0, backend_dir)
-
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from app.core.config import settings
-from app.core.database import engine, Base
-from app.routers import auth, company, recruiter, jobs
+from app.config import settings
 
-# Create database tables automatically on startup if using SQLite/local dev
-Base.metadata.create_all(bind=engine)
+# Import Routers
+from app.routers import (
+    auth_router,
+    profile_router,
+    skills_router,
+    assessments_router,
+    opportunities_router,
+    projects_router,
+    admin_router,
+    recruiter_router,
+    payments_router
+)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    version=settings.VERSION,
-    description="CareerPilot AI - Recruiter Module Phase 1 REST API Foundation & Job Management",
-    docs_url="/docs",
-    redoc_url="/redoc"
+    description="CareerPilot AI Full-Stack Platform API",
+    version="1.0.0"
 )
 
-# CORS Middleware
+# CORS setup for Vue dev server
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # Include Routers
-app.include_router(auth.router, prefix=settings.API_V1_STR)
-app.include_router(company.router, prefix=settings.API_V1_STR)
-app.include_router(recruiter.router, prefix=settings.API_V1_STR)
-app.include_router(jobs.router, prefix=settings.API_V1_STR)
+app.include_router(auth_router.router)
+app.include_router(profile_router.router)
+app.include_router(skills_router.router)
+app.include_router(assessments_router.router)
+app.include_router(opportunities_router.router)
+app.include_router(projects_router.router)
+app.include_router(admin_router.router)
+app.include_router(recruiter_router.router)
+app.include_router(payments_router.router)
 
 @app.get("/")
 def root():
     return {
-        "project": settings.PROJECT_NAME,
-        "version": settings.VERSION,
+        "message": "Welcome to CareerPilot AI Platform API",
         "status": "online",
         "docs": "/docs"
     }
 
-@app.exception_handler(Exception)
-def global_exception_handler(request: Request, exc: Exception):
-    return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={
-            "success": False,
-            "message": f"Internal server error: {str(exc)}",
-            "error_code": "INTERNAL_SERVER_ERROR"
-        }
-    )
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
