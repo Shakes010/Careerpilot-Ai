@@ -1,182 +1,80 @@
-from fastapi import HTTPException, status
+from datetime import datetime, timedelta, timezone
+from typing import Optional
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from app.models.user import User, UserRole
-from app.models.company import Company, VerificationStatus
-from app.models.recruiter import Recruiter
-from app.repositories.user_repository import UserRepository
-from app.repositories.company_repository import CompanyRepository
-from app.repositories.recruiter_repository import RecruiterRepository
-from app.schemas.auth import RecruiterRegisterRequest, RecruiterLoginRequest, TokenResponse, ChangePasswordRequest, ChangeEmailRequest, UserResponse
-from app.core.security import get_password_hash, verify_password, create_access_token
+from app.config import settings
+from app.database import get_db
+import app.models as models
 
-class AuthService:
-    def __init__(self, db: Session):
-        self.db = db
-        self.user_repo = UserRepository(db)
-        self.company_repo = CompanyRepository(db)
-        self.recruiter_repo = RecruiterRepository(db)
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-    def register_recruiter(self, req: RecruiterRegisterRequest) -> TokenResponse:
-        # Check duplicate email
-        existing_user = self.user_repo.get_by_email(req.email)
-        if existing_user:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email is already registered. Please login instead."
-            )
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
 
-        # 1. Create Company (PENDING verification status)
-        company = Company(
-            name=req.company_name.strip(),
-            website=req.company_website.strip() if req.company_website else None,
-            verification_status=VerificationStatus.PENDING
-        )
-        company = self.company_repo.create(company)
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
 
-        # 2. Create User (RECRUITER role)
-        user = User(
-            email=req.email.lower().strip(),
-            password_hash=get_password_hash(req.password),
-            full_name=req.full_name.strip(),
-            phone=req.phone.strip() if req.phone else None,
-            role=UserRole.RECRUITER,
-            is_active=True
-        )
-        user = self.user_repo.create(user)
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encoded_jwt
 
-        # 3. Create Recruiter profile link
-        recruiter = Recruiter(
-            user_id=user.id,
-            company_id=company.id,
-            designation=req.designation.strip() if req.designation else "Hiring Manager"
-        )
-        recruiter = self.recruiter_repo.create(recruiter)
+def check_eligibility(degree: Optional[str], graduation_year: Optional[int]) -> bool:
+    if not degree or not graduation_year:
+        return False
 
-        # 4. Generate JWT
-        token = create_access_token(data={"sub": user.id, "role": user.role.value, "recruiter_id": recruiter.id, "company_id": company.id})
+    degree_lower = degree.lower()
+    cs_keywords = [
+        "cs", "computer", "it", "information technology", "bca", "mca",
+        "software", "data science", "ai", "artificial intelligence", "computational"
+    ]
+    is_cs_it = any(kw in degree_lower for kw in cs_keywords)
 
-        return TokenResponse(
-            access_token=token,
-            user_id=user.id,
-            email=user.email,
-            full_name=user.full_name,
-            role=user.role.value,
-            company_id=company.id,
-            company_name=company.name,
-            company_verification_status=company.verification_status.value
-        )
+    # Strictly recent pass-outs or current students (2023 to 2028)
+    is_recent_grad = 2023 <= graduation_year <= 2028
 
-    def login_universal(self, req: RecruiterLoginRequest) -> TokenResponse:
-        """Universal authentication method supporting ADMIN, RECRUITER, and STUDENT roles."""
-        user = self.user_repo.get_by_email(req.email)
-        if not user or not verify_password(req.password, user.password_hash):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid email or password."
-            )
+    return is_cs_it and is_recent_grad
 
-        if user.is_active is False:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Account is deactivated or suspended. Please contact platform support."
-            )
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> models.User:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        user_id_str: str = payload.get("sub")
+        if user_id_str is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
 
-        # ADMIN User Role
-        if user.role == UserRole.ADMIN:
-            token = create_access_token(data={"sub": user.id, "role": user.role.value})
-            return TokenResponse(
-                access_token=token,
-                user_id=user.id,
-                email=user.email,
-                full_name=user.full_name,
-                role=user.role.value,
-                company_id="",
-                company_name="Platform Administration",
-                company_verification_status="VERIFIED"
-            )
+    user = db.query(models.User).filter(models.User.id == user_id_str).first()
+    if user is None:
+        raise credentials_exception
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user account")
+    return user
 
-        # RECRUITER User Role
-        if user.role == UserRole.RECRUITER:
-            recruiter = self.recruiter_repo.get_by_user_id(user.id)
-            company_id = recruiter.company_id if recruiter else ""
-            company_name = "Company"
-            company_status = "PENDING"
-            if recruiter and recruiter.company_id:
-                company = self.company_repo.get_by_id(recruiter.company_id)
-                if company:
-                    company_name = company.name
-                    company_status = company.verification_status.value
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
 
-            token = create_access_token(data={"sub": user.id, "role": user.role.value, "recruiter_id": recruiter.id if recruiter else None, "company_id": company_id})
-            return TokenResponse(
-                access_token=token,
-                user_id=user.id,
-                email=user.email,
-                full_name=user.full_name,
-                role=user.role.value,
-                company_id=company_id,
-                company_name=company_name,
-                company_verification_status=company_status
-            )
-
-        # STUDENT User Role
-        token = create_access_token(data={"sub": user.id, "role": user.role.value})
-        return TokenResponse(
-            access_token=token,
-            user_id=user.id,
-            email=user.email,
-            full_name=user.full_name,
-            role=user.role.value,
-            company_id="",
-            company_name="Student Portal",
-            company_verification_status="VERIFIED"
-        )
-
-    def login_recruiter(self, req: RecruiterLoginRequest) -> TokenResponse:
-        return self.login_universal(req)
-
-    def change_password(self, user: User, req: ChangePasswordRequest) -> bool:
-        """Validate current password and update to new password."""
-        if not verify_password(req.current_password, user.password_hash):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Current password is incorrect."
-            )
-
-        user.password_hash = get_password_hash(req.new_password)
-        self.db.commit()
-        return True
-
-    def change_email(self, user: User, req: ChangeEmailRequest) -> UserResponse:
-        """Validate current password, verify email uniqueness, and update email address."""
-        if not verify_password(req.password, user.password_hash):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Incorrect password. Password verification required to change email."
-            )
-
-        new_email = req.new_email.lower().strip()
-        if new_email == user.email.lower():
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="New email is identical to current email."
-            )
-
-        existing = self.user_repo.get_by_email(new_email)
-        if existing:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="This email address is already in use by another account."
-            )
-
-        user.email = new_email
-        self.db.commit()
-        self.db.refresh(user)
-        return UserResponse(
-            id=user.id,
-            email=user.email,
-            full_name=user.full_name,
-            phone=user.phone,
-            role=user.role.value,
-            is_active=user.is_active
-        )
+def get_current_user_optional(token: Optional[str] = Depends(oauth2_scheme_optional), db: Session = Depends(get_db)) -> Optional[models.User]:
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        user_id_str: str = payload.get("sub")
+        if user_id_str is None:
+            return None
+        return db.query(models.User).filter(models.User.id == user_id_str).first()
+    except Exception:
+        return None
